@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500&amp;family=Roboto:wght@400;500;600;700&amp;family=JetBrains+Mono&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .fill-icon {
+            font-variation-settings: 'FILL' 1;
+        }
+        body {
+            -webkit-tap-highlight-color: transparent;
+            scrollbar-width: none;
+        }
+        body::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-on-surface": "#313030",
+                        "on-surface-variant": "#c1c6d6",
+                        "on-error-container": "#ffdad6",
+                        "tertiary-container": "#c55500",
+                        "surface-tint": "#adc7ff",
+                        "on-secondary": "#3c2f00",
+                        "on-tertiary-container": "#0e0200",
+                        "secondary-fixed-dim": "#edc200",
+                        "background-light": "#FFFFFF",
+                        "outline-variant": "#414754",
+                        "on-tertiary-fixed-variant": "#783100",
+                        "error-container": "#93000a",
+                        "primary-fixed-dim": "#adc7ff",
+                        "surface-container-low": "#1c1b1b",
+                        "surface-light": "#F5F5F5",
+                        "surface-variant": "#353534",
+                        "surface-container-highest": "#353534",
+                        "surface-container-lowest": "#0e0e0e",
+                        "inverse-primary": "#005bc0",
+                        "tertiary-fixed-dim": "#ffb691",
+                        "outline": "#8b909f",
+                        "on-secondary-fixed-variant": "#564500",
+                        "on-surface": "#e5e2e1",
+                        "secondary": "#ffe490",
+                        "tertiary-fixed": "#ffdbcb",
+                        "on-tertiary": "#552100",
+                        "surface-dim": "#131313",
+                        "surface": "#131313",
+                        "on-primary-fixed-variant": "#004493",
+                        "inverse-surface": "#e5e2e1",
+                        "on-primary-container": "#ffffff",
+                        "primary-container": "#1a73e8",
+                        "background": "#131313",
+                        "success": "#34A853",
+                        "on-background": "#e5e2e1",
+                        "surface-dark": "#1E1E1E",
+                        "surface-container-high": "#2a2a2a",
+                        "on-tertiary-fixed": "#341100",
+                        "tertiary": "#ffb691",
+                        "on-secondary-fixed": "#231b00",
+                        "on-primary": "#002e68",
+                        "surface-container": "#201f1f",
+                        "on-error": "#690005",
+                        "primary-fixed": "#d8e2ff",
+                        "secondary-container": "#f1c501",
+                        "surface-bright": "#393939",
+                        "primary": "#adc7ff",
+                        "secondary-fixed": "#ffe080",
+                        "warning": "#EA4335",
+                        "on-primary-fixed": "#001a41",
+                        "error": "#ffb4ab",
+                        "on-secondary-container": "#665200"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-sm": "8px",
+                        "stack-lg": "24px",
+                        "stack-md": "16px",
+                        "baseline": "4px",
+                        "gutter": "12px",
+                        "edge-margin": "16px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Noto Sans"],
+                        "code-sm": ["jetbrainsMono"],
+                        "headline-md": ["Roboto"],
+                        "label-lg": ["Roboto"],
+                        "title-lg": ["Noto Sans"],
+                        "body-lg": ["Noto Sans"],
+                        "headline-lg": ["Roboto"]
+                    },
+                    "fontSize": {
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "code-sm": ["12px", {"lineHeight": "16px", "fontWeight": "400"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "label-lg": ["12px", {"lineHeight": "16px", "letterSpacing": "0.1px", "fontWeight": "500"}],
+                        "title-lg": ["20px", {"lineHeight": "28px", "fontWeight": "500"}],
+                        "body-lg": ["16px", {"lineHeight": "24px", "letterSpacing": "0.5px", "fontWeight": "400"}],
+                        "headline-lg": ["28px", {"lineHeight": "36px", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen font-body-md flex flex-col pb-24">
+<!-- TopAppBar -->
+<header class="bg-background dark:bg-background flex items-center justify-between px-edge-margin w-full h-16 sticky top-0 z-50">
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-on-surface-variant hover:bg-surface-container-high dark:hover:bg-surface-container-high transition-colors p-2 rounded-full active:scale-95 duration-200">menu</button>
+<h1 class="font-headline-md text-headline-md font-bold text-on-background dark:text-on-background">柠檬字幕工作室</h1>
+</div>
+<button class="material-symbols-outlined text-on-surface-variant hover:bg-surface-container-high transition-colors p-2 rounded-full">search</button>
+</header>
+<main class="flex-grow px-edge-margin mt-4">
+<!-- Header Section -->
+<section class="mb-stack-lg">
+<h2 class="font-headline-lg text-headline-lg text-on-background mb-stack-sm">模型管理</h2>
+<p class="font-body-md text-on-surface-variant">管理并下载 Whisper 语音识别模型，以优化您的本地字幕处理速度。</p>
+</section>
+<!-- Imported Models Section -->
+<section class="mb-stack-lg">
+<div class="flex items-center justify-between mb-stack-md">
+<h3 class="font-title-lg text-title-lg text-primary">已导入模型</h3>
+<span class="bg-primary-container text-on-primary-container px-3 py-1 rounded-full font-label-lg text-label-lg">1 个模型</span>
+</div>
+<!-- Model Card (Active) -->
+<div class="space-y-stack-md" id="model-list">
+<div class="bg-surface-container-low border border-outline-variant p-4 rounded-xl flex items-center justify-between hover:bg-surface-container transition-all group">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary fill-icon">database</span>
+</div>
+<div>
+<p class="font-title-lg text-title-lg text-on-surface">Whisper small</p>
+<p class="font-code-sm text-code-sm text-on-surface-variant">466MB • GGUF 格式</p>
+</div>
+</div>
+<button class="text-error material-symbols-outlined p-2 rounded-full hover:bg-error/10 active:scale-90 transition-all">delete</button>
+</div>
+<!-- Empty State Hidden by default, toggle via JS if needed -->
+<div class="hidden flex flex-col items-center justify-center py-12 text-center opacity-60" id="empty-state">
+<img alt="No models imported" class="w-32 h-32 mb-4 opacity-40 grayscale" data-alt="A clean and minimalist digital illustration of a stylized computer file folder being empty with a magnifying glass hovering over it. The scene is set in a dark mode environment with a background of deep charcoal and subtle midnight blue gradients. The lighting is soft, cold-toned, and diffuse, creating a focused but professional atmosphere. This minimalist artwork is part of a high-end productivity app design." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBMfNPw8RX0Mfi9X5XjyKtC-2L9Bv15RWkM9_d_r0ypPCzV_dFKCi_PQPMzQKtTl9Or8OuBkVyJzAXh9u9EsLVbyfxPte86w27ZqGvdjwJGYDrhADkO2dwS60ya2G4yG3rXaLoG_wmOB2dDbUIoCRBzg-iUbjRzLtH1K4iPW1rxCEKwfbiOk_C7RysbKl6YQv1mA5FJruuaP_9f9lnis7sadeDAH1t8rn6wNQ8HN6YgwuSVcI5PCPldRV5Ka55jKDdiyGYPyGhSUuLT"/>
+<p class="font-title-lg text-title-lg text-on-surface-variant">暂无导入的模型</p>
+<p class="font-body-md text-on-surface-variant">请从下方列表下载或手动导入</p>
+</div>
+</div>
+</section>
+<!-- Downloadable Models Section -->
+<section class="mb-stack-lg">
+<div class="flex items-center justify-between mb-stack-md">
+<h3 class="font-title-lg text-title-lg text-on-surface">推荐下载</h3>
+<a class="text-primary font-label-lg text-label-lg flex items-center gap-1 hover:underline" href="https://huggingface.co/ggerganov/whisper.cpp" target="_blank">
+                    查看 HuggingFace <span class="material-symbols-outlined text-[16px]">open_in_new</span>
+</a>
+</div>
+<div class="grid grid-cols-1 gap-stack-md">
+<!-- Tiny -->
+<div class="bg-surface-container-highest p-4 rounded-xl flex items-center justify-between group hover:bg-surface-bright transition-all">
+<div>
+<p class="font-title-lg text-title-lg text-on-surface">Whisper tiny</p>
+<p class="font-body-md text-on-surface-variant">75MB • 极速识别，低准确率</p>
+</div>
+<button class="bg-primary-container text-on-primary-container p-3 rounded-full flex items-center justify-center active:scale-90 transition-all">
+<span class="material-symbols-outlined">download</span>
+</button>
+</div>
+<!-- Base -->
+<div class="bg-surface-container-highest p-4 rounded-xl flex items-center justify-between group hover:bg-surface-bright transition-all">
+<div>
+<p class="font-title-lg text-title-lg text-on-surface">Whisper base</p>
+<p class="font-body-md text-on-surface-variant">142MB • 均衡速度与效果</p>
+</div>
+<button class="bg-primary-container text-on-primary-container p-3 rounded-full flex items-center justify-center active:scale-90 transition-all">
+<span class="material-symbols-outlined">download</span>
+</button>
+</div>
+<!-- Small (Already imported state in download list) -->
+<div class="bg-surface-container-highest/50 p-4 rounded-xl flex items-center justify-between opacity-80">
+<div>
+<p class="font-title-lg text-title-lg text-on-surface">Whisper small</p>
+<p class="font-body-md text-on-surface-variant">466MB • 高准确率，推荐使用</p>
+</div>
+<div class="text-success flex items-center gap-2 pr-2">
+<span class="material-symbols-outlined">check_circle</span>
+<span class="font-label-lg text-label-lg">已就绪</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Import Custom Section -->
+<div class="mt-stack-lg p-6 bg-secondary-container/10 border border-dashed border-secondary-container/40 rounded-2xl flex flex-col items-center text-center">
+<span class="material-symbols-outlined text-secondary-container text-4xl mb-2">upload_file</span>
+<h4 class="font-title-lg text-title-lg text-on-surface">手动导入模型</h4>
+<p class="font-body-md text-on-surface-variant mb-stack-md">支持 .bin 或 .gguf 格式的 Whisper 模型文件</p>
+<button class="bg-secondary-container text-on-secondary-container px-6 py-2 rounded-full font-label-lg text-label-lg font-bold hover:bg-secondary-fixed transition-colors active:scale-95">选择文件</button>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full z-50 flex justify-around items-center px-gutter py-2 bg-surface-container dark:bg-surface-container">
+<!-- Studio -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant px-5 py-1 hover:bg-surface-bright dark:hover:bg-surface-bright transition-all active:scale-90 duration-150" href="#">
+<span class="material-symbols-outlined">workspaces</span>
+<span class="font-label-lg text-label-lg">Studio</span>
+</a>
+<!-- Subtitle Edit -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant px-5 py-1 hover:bg-surface-bright dark:hover:bg-surface-bright transition-all active:scale-90 duration-150" href="#">
+<span class="material-symbols-outlined">movie_edit</span>
+<span class="font-label-lg text-label-lg">Subtitle Edit</span>
+</a>
+<!-- Model (Active) -->
+<a class="flex flex-col items-center justify-center bg-secondary-container dark:bg-secondary-container text-on-secondary-container dark:text-on-secondary-container rounded-xl px-5 py-1 hover:bg-surface-bright dark:hover:bg-surface-bright transition-all active:scale-90 duration-150" href="#">
+<span class="material-symbols-outlined fill-icon">database</span>
+<span class="font-label-lg text-label-lg">Model</span>
+</a>
+<!-- Settings -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant px-5 py-1 hover:bg-surface-bright dark:hover:bg-surface-bright transition-all active:scale-90 duration-150" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-lg text-label-lg">Settings</span>
+</a>
+</nav>
+<!-- Interactions -->
+<script>
+        // Simple mock interaction for deletion
+        document.querySelectorAll('.text-error').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const card = this.closest('.bg-surface-container-low');
+                card.style.opacity = '0';
+                card.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    card.remove();
+                    // If no children left, show empty state
+                    const list = document.getElementById('model-list');
+                    if (list.children.length === 1 && list.children[0].id === 'empty-state') {
+                        document.getElementById('empty-state').classList.remove('hidden');
+                    } else if (list.querySelectorAll('.bg-surface-container-low').length === 0) {
+                        document.getElementById('empty-state').classList.remove('hidden');
+                    }
+                }, 200);
+            });
+        });
+    </script>
+</body></html>

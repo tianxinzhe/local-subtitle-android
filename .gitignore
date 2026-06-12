@@ -1,0 +1,29 @@
+# Android
+*.apk
+*.aab
+*.dex
+*.class
+bin/
+gen/
+build/
+.idea/
+.gradle/
+local.properties
+
+# Kotlin
+*.kotlin_module
+
+# NDK
+.cxx/
+*.o
+*.so
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+*.iml
+*.swp
+*.swo
+*~

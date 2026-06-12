@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;700&amp;family=Roboto:wght@400;500;700&amp;family=JetBrains+Mono:wght@400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .active-icon {
+            font-variation-settings: 'FILL' 1;
+        }
+        body {
+            background-color: #131313;
+            color: #e5e2e1;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .settings-list-item:active {
+            background-color: rgba(255, 255, 255, 0.08);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-on-surface": "#313030",
+                        "on-surface-variant": "#c1c6d6",
+                        "on-error-container": "#ffdad6",
+                        "tertiary-container": "#c55500",
+                        "surface-tint": "#adc7ff",
+                        "on-secondary": "#3c2f00",
+                        "on-tertiary-container": "#0e0200",
+                        "secondary-fixed-dim": "#edc200",
+                        "outline-variant": "#414754",
+                        "error-container": "#93000a",
+                        "primary-fixed-dim": "#adc7ff",
+                        "surface-container-low": "#1c1b1b",
+                        "surface-variant": "#353534",
+                        "surface-container-highest": "#353534",
+                        "surface-container-lowest": "#0e0e0e",
+                        "inverse-primary": "#005bc0",
+                        "tertiary-fixed-dim": "#ffb691",
+                        "outline": "#8b909f",
+                        "on-surface": "#e5e2e1",
+                        "secondary": "#ffe490",
+                        "tertiary-fixed": "#ffdbcb",
+                        "on-tertiary": "#552100",
+                        "surface-dim": "#131313",
+                        "surface": "#131313",
+                        "on-primary-fixed-variant": "#004493",
+                        "inverse-surface": "#e5e2e1",
+                        "on-primary-container": "#ffffff",
+                        "primary-container": "#1a73e8",
+                        "background": "#131313",
+                        "success": "#34A853",
+                        "on-background": "#e5e2e1",
+                        "surface-dark": "#1E1E1E",
+                        "surface-container-high": "#2a2a2a",
+                        "on-tertiary-fixed": "#341100",
+                        "tertiary": "#ffb691",
+                        "on-secondary-fixed": "#231b00",
+                        "on-primary": "#002e68",
+                        "surface-container": "#201f1f",
+                        "on-error": "#690005",
+                        "primary-fixed": "#d8e2ff",
+                        "secondary-container": "#f1c501",
+                        "surface-bright": "#393939",
+                        "primary": "#adc7ff",
+                        "secondary-fixed": "#ffe080",
+                        "warning": "#EA4335",
+                        "on-primary-fixed": "#001a41",
+                        "error": "#ffb4ab",
+                        "on-secondary-container": "#665200"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-sm": "8px",
+                        "stack-lg": "24px",
+                        "stack-md": "16px",
+                        "baseline": "4px",
+                        "gutter": "12px",
+                        "edge-margin": "16px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Noto Sans"],
+                        "code-sm": ["jetbrainsMono"],
+                        "headline-md": ["Roboto"],
+                        "label-lg": ["Roboto"],
+                        "title-lg": ["Noto Sans"],
+                        "body-lg": ["Noto Sans"],
+                        "headline-lg": ["Roboto"]
+                    },
+                    "fontSize": {
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "code-sm": ["12px", {"lineHeight": "16px", "fontWeight": "400"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "label-lg": ["12px", {"lineHeight": "16px", "letterSpacing": "0.1px", "fontWeight": "500"}],
+                        "title-lg": ["20px", {"lineHeight": "28px", "fontWeight": "500"}],
+                        "body-lg": ["16px", {"lineHeight": "24px", "letterSpacing": "0.5px", "fontWeight": "400"}],
+                        "headline-lg": ["28px", {"lineHeight": "36px", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md text-body-md overflow-x-hidden">
+<!-- Top App Bar -->
+<header class="flex items-center justify-between px-edge-margin w-full h-16 sticky top-0 z-40 bg-background">
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-on-surface-variant hover:bg-surface-container-high transition-colors p-2 rounded-full active:scale-95 duration-200">
+                arrow_back
+            </button>
+<h1 class="font-headline-md text-headline-md font-bold text-on-background">Settings</h1>
+</div>
+</header>
+<main class="pb-24 max-w-2xl mx-auto">
+<!-- Section: Transcription -->
+<div class="px-edge-margin pt-6 pb-2">
+<h2 class="text-primary font-label-lg text-label-lg uppercase tracking-wider">Transcription &amp; AI</h2>
+</div>
+<div class="flex flex-col">
+<!-- Default Target Language -->
+<button class="settings-list-item flex items-center px-edge-margin py-4 gap-4 transition-all duration-200">
+<div class="material-symbols-outlined text-on-surface-variant">translate</div>
+<div class="flex flex-col items-start flex-1">
+<span class="font-title-lg text-title-lg text-on-surface">Default Target Language</span>
+<span class="font-body-md text-body-md text-on-surface-variant">Chinese (Simplified)</span>
+</div>
+</button>
+<!-- Default Precision Mode -->
+<div class="px-edge-margin py-4">
+<div class="flex items-center gap-4 mb-3">
+<div class="material-symbols-outlined text-on-surface-variant">psychology</div>
+<span class="font-title-lg text-title-lg text-on-surface">Default Precision Mode</span>
+</div>
+<div class="flex bg-surface-container-low rounded-xl p-1 gap-1">
+<button class="flex-1 py-2 rounded-lg font-label-lg text-label-lg bg-secondary-container text-on-secondary-container transition-all active:scale-95">Fast</button>
+<button class="flex-1 py-2 rounded-lg font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container-high transition-all active:scale-95">Balanced</button>
+<button class="flex-1 py-2 rounded-lg font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container-high transition-all active:scale-95">High</button>
+</div>
+</div>
+</div>
+<!-- Section: System -->
+<div class="px-edge-margin pt-6 pb-2 mt-4">
+<h2 class="text-primary font-label-lg text-label-lg uppercase tracking-wider">System &amp; Storage</h2>
+</div>
+<div class="flex flex-col">
+<!-- Default Output Directory -->
+<button class="settings-list-item flex items-center px-edge-margin py-4 gap-4 transition-all duration-200">
+<div class="material-symbols-outlined text-on-surface-variant">folder_open</div>
+<div class="flex flex-col items-start flex-1">
+<span class="font-title-lg text-title-lg text-on-surface">Default Output Directory</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant">/Internal Storage/Movies/LemonSubtitle</span>
+</div>
+</button>
+<!-- App Language -->
+<button class="settings-list-item flex items-center px-edge-margin py-4 gap-4 transition-all duration-200">
+<div class="material-symbols-outlined text-on-surface-variant">language</div>
+<div class="flex flex-col items-start flex-1">
+<span class="font-title-lg text-title-lg text-on-surface">App Language</span>
+<span class="font-body-md text-body-md text-on-surface-variant">System Default</span>
+</div>
+<div class="material-symbols-outlined text-on-surface-variant">chevron_right</div>
+</button>
+</div>
+<!-- Section: About -->
+<div class="px-edge-margin pt-6 pb-2 mt-4">
+<h2 class="text-primary font-label-lg text-label-lg uppercase tracking-wider">About</h2>
+</div>
+<div class="flex flex-col">
+<!-- Version Info -->
+<div class="flex items-center px-edge-margin py-4 gap-4">
+<div class="material-symbols-outlined text-on-surface-variant">info</div>
+<div class="flex flex-col items-start flex-1">
+<span class="font-title-lg text-title-lg text-on-surface">Version</span>
+<span class="font-body-md text-body-md text-on-surface-variant">v2.4.0-stable (Build 20241021)</span>
+</div>
+</div>
+<!-- Open Source -->
+<button class="settings-list-item flex items-center px-edge-margin py-4 gap-4 transition-all duration-200">
+<div class="material-symbols-outlined text-on-surface-variant">code</div>
+<div class="flex flex-col items-start flex-1">
+<span class="font-title-lg text-title-lg text-on-surface">Open source licenses</span>
+<span class="font-body-md text-body-md text-on-surface-variant">Third-party software notices</span>
+</div>
+</button>
+<!-- Legal -->
+<button class="settings-list-item flex items-center px-edge-margin py-4 gap-4 transition-all duration-200">
+<div class="material-symbols-outlined text-on-surface-variant">gavel</div>
+<div class="flex flex-col items-start flex-1">
+<span class="font-title-lg text-title-lg text-on-surface">Privacy Policy</span>
+</div>
+</button>
+</div>
+<!-- Aesthetic Branding Card (Bento Style) -->
+<div class="px-edge-margin mt-12 mb-8">
+<div class="relative overflow-hidden bg-surface-container rounded-3xl p-6 border border-outline-variant/30">
+<div class="absolute -right-8 -bottom-8 w-32 h-32 bg-primary/10 rounded-full blur-3xl"></div>
+<div class="relative z-10 flex flex-col gap-2">
+<div class="w-12 h-12 bg-primary-container rounded-2xl flex items-center justify-center mb-2">
+<span class="material-symbols-outlined text-on-primary-container" style="font-variation-settings: 'FILL' 1;">admin</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface">柠檬字幕工作室</h3>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+                        Crafting professional subtitle workflows with precision and AI-driven efficiency. Designed for creators, by creators.
+                    </p>
+<div class="mt-4 flex gap-3">
+<span class="px-3 py-1 bg-surface-container-high rounded-full text-label-lg font-label-lg text-primary">Official Website</span>
+<span class="px-3 py-1 bg-surface-container-high rounded-full text-label-lg font-label-lg text-primary">GitHub</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Bar (Mandatory Implementation) -->
+<nav class="fixed bottom-0 w-full z-50 flex justify-around items-center px-gutter py-2 bg-surface-container">
+<!-- Studio Tab -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant px-5 py-1 hover:bg-surface-bright transition-all active:scale-90 duration-150">
+<span class="material-symbols-outlined mb-1">workspaces</span>
+<span class="font-label-lg text-label-lg">Studio</span>
+</button>
+<!-- Subtitle Edit Tab -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant px-5 py-1 hover:bg-surface-bright transition-all active:scale-90 duration-150">
+<span class="material-symbols-outlined mb-1">movie_edit</span>
+<span class="font-label-lg text-label-lg">Subtitle Edit</span>
+</button>
+<!-- Model Tab -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant px-5 py-1 hover:bg-surface-bright transition-all active:scale-90 duration-150">
+<span class="material-symbols-outlined mb-1">database</span>
+<span class="font-label-lg text-label-lg">Model</span>
+</button>
+<!-- Settings Tab (ACTIVE) -->
+<button class="flex flex-col items-center justify-center bg-secondary-container dark:bg-secondary-container text-on-secondary-container dark:text-on-secondary-container rounded-xl px-5 py-1 active:scale-90 duration-150">
+<span class="material-symbols-outlined active-icon mb-1">settings</span>
+<span class="font-label-lg text-label-lg">Settings</span>
+</button>
+</nav>
+<script>
+        // Micro-interactions for precision mode switcher
+        const precisionButtons = document.querySelectorAll('.flex.bg-surface-container-low button');
+        precisionButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                precisionButtons.forEach(b => {
+                    b.classList.remove('bg-secondary-container', 'text-on-secondary-container');
+                    b.classList.add('text-on-surface-variant', 'hover:bg-surface-container-high');
+                });
+                btn.classList.add('bg-secondary-container', 'text-on-secondary-container');
+                btn.classList.remove('text-on-surface-variant', 'hover:bg-surface-container-high');
+            });
+        });
+
+        // Ripples simulation on list items
+        document.querySelectorAll('.settings-list-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                let ripple = document.createElement('span');
+                ripple.classList.add('ripple');
+                this.appendChild(ripple);
+                setTimeout(() => ripple.remove(), 600);
+            });
+        });
+    </script>
+<style>
+        .ripple {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            border-radius: 50%;
+            animation: ripples 0.6s linear;
+            width: 0;
+            height: 0;
+        }
+        @keyframes ripples {
+            from { width: 0; height: 0; opacity: 0.5; }
+            to { width: 500px; height: 500px; opacity: 0; }
+        }
+    </style>
+</body></html>

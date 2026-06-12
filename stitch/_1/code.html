@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>LemonSubtitle Studio</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Noto+Sans:wght@400;500;700&family=JetBrains+Mono&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@100..900&family=Roboto:wght@100..900&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-on-surface": "#313030",
+                        "on-surface-variant": "#c1c6d6",
+                        "on-error-container": "#ffdad6",
+                        "tertiary-container": "#c55500",
+                        "surface-tint": "#adc7ff",
+                        "on-secondary": "#3c2f00",
+                        "on-tertiary-container": "#0e0200",
+                        "secondary-fixed-dim": "#edc200",
+                        "outline-variant": "#414754",
+                        "on-tertiary-fixed-variant": "#783100",
+                        "error-container": "#93000a",
+                        "primary-fixed-dim": "#adc7ff",
+                        "surface-container-low": "#1c1b1b",
+                        "surface-variant": "#353534",
+                        "surface-container-highest": "#353534",
+                        "surface-container-lowest": "#0e0e0e",
+                        "inverse-primary": "#005bc0",
+                        "tertiary-fixed-dim": "#ffb691",
+                        "outline": "#8b909f",
+                        "on-secondary-fixed-variant": "#564500",
+                        "on-surface": "#e5e2e1",
+                        "secondary": "#ffe490",
+                        "tertiary-fixed": "#ffdbcb",
+                        "on-tertiary": "#552100",
+                        "surface-dim": "#131313",
+                        "surface": "#131313",
+                        "on-primary-fixed-variant": "#004493",
+                        "inverse-surface": "#e5e2e1",
+                        "on-primary-container": "#ffffff",
+                        "primary-container": "#1a73e8",
+                        "background": "#131313",
+                        "success": "#34A853",
+                        "on-background": "#e5e2e1",
+                        "surface-dark": "#1E1E1E",
+                        "surface-container-high": "#2a2a2a",
+                        "on-tertiary-fixed": "#341100",
+                        "tertiary": "#ffb691",
+                        "on-secondary-fixed": "#231b00",
+                        "on-primary": "#002e68",
+                        "surface-container": "#201f1f",
+                        "on-error": "#690005",
+                        "primary-fixed": "#d8e2ff",
+                        "secondary-container": "#f1c501",
+                        "surface-bright": "#393939",
+                        "primary": "#adc7ff",
+                        "secondary-fixed": "#ffe080",
+                        "warning": "#EA4335",
+                        "on-primary-fixed": "#001a41",
+                        "error": "#ffb4ab",
+                        "on-secondary-container": "#665200"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-sm": "8px",
+                        "stack-lg": "24px",
+                        "stack-md": "16px",
+                        "baseline": "4px",
+                        "gutter": "12px",
+                        "edge-margin": "16px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Noto Sans"],
+                        "code-sm": ["jetbrainsMono"],
+                        "headline-md": ["Roboto"],
+                        "label-lg": ["Roboto"],
+                        "title-lg": ["Noto Sans"],
+                        "body-lg": ["Noto Sans"],
+                        "headline-lg": ["Roboto"]
+                    },
+                    "fontSize": {
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "code-sm": ["12px", {"lineHeight": "16px", "fontWeight": "400"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "label-lg": ["12px", {"lineHeight": "16px", "letterSpacing": "0.1px", "fontWeight": "500"}],
+                        "title-lg": ["20px", {"lineHeight": "28px", "fontWeight": "500"}],
+                        "body-lg": ["16px", {"lineHeight": "24px", "letterSpacing": "0.5px", "fontWeight": "400"}],
+                        "headline-lg": ["28px", {"lineHeight": "36px", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .glass-panel {
+            background: rgba(32, 31, 31, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md min-h-screen pb-32">
+<!-- Top App Bar -->
+<header class="flex items-center justify-between px-edge-margin w-full h-16 sticky top-0 z-50 bg-background">
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-on-surface-variant active:scale-95 duration-200">menu</button>
+<h1 class="font-headline-md text-headline-md font-bold text-on-background">柠檬字幕工作室</h1>
+</div>
+<div class="flex gap-4">
+<button class="material-symbols-outlined text-on-surface-variant hover:bg-surface-container-high transition-colors p-2 rounded-full">notifications</button>
+<button class="material-symbols-outlined text-on-surface-variant hover:bg-surface-container-high transition-colors p-2 rounded-full">account_circle</button>
+</div>
+</header>
+<main class="flex flex-col gap-stack-lg mt-stack-md">
+<!-- Horizontal Quick Actions -->
+<section class="flex flex-col gap-stack-sm">
+<div class="px-edge-margin flex justify-between items-center">
+<h2 class="font-title-lg text-title-lg">快速操作</h2>
+<span class="text-primary font-label-lg text-label-lg">查看全部</span>
+</div>
+<div class="flex overflow-x-auto gap-stack-md px-edge-margin hide-scrollbar pb-2">
+<!-- Action Cards -->
+<button class="flex-shrink-0 flex flex-col items-center justify-center bg-surface-container-high p-4 rounded-xl w-28 aspect-square gap-2 active:scale-95 transition-transform border border-outline-variant/20">
+<span class="material-symbols-outlined text-primary text-3xl">audio_file</span>
+<span class="font-label-lg text-label-lg">提取音频</span>
+</button>
+<button class="flex-shrink-0 flex flex-col items-center justify-center bg-surface-container-high p-4 rounded-xl w-28 aspect-square gap-2 active:scale-95 transition-transform border border-outline-variant/20">
+<span class="material-symbols-outlined text-secondary text-3xl">interpreter_mode</span>
+<span class="font-label-lg text-label-lg">转字幕</span>
+</button>
+<button class="flex-shrink-0 flex flex-col items-center justify-center bg-surface-container-high p-4 rounded-xl w-28 aspect-square gap-2 active:scale-95 transition-transform border border-outline-variant/20">
+<span class="material-symbols-outlined text-tertiary text-3xl">translate</span>
+<span class="font-label-lg text-label-lg">翻译字幕</span>
+</button>
+<button class="flex-shrink-0 flex flex-col items-center justify-center bg-primary-container p-4 rounded-xl w-28 aspect-square gap-2 active:scale-95 transition-transform shadow-lg">
+<span class="material-symbols-outlined text-on-primary-container text-3xl">bolt</span>
+<span class="font-label-lg text-label-lg text-on-primary-container">自动流水线</span>
+</button>
+</div>
+</section>
+<!-- Large File Selector -->
+<section class="px-edge-margin">
+<div class="relative w-full aspect-video rounded-2xl bg-surface-container-lowest border-2 border-dashed border-outline-variant flex flex-col items-center justify-center gap-stack-md overflow-hidden group cursor-pointer active:scale-[0.98] transition-all">
+<!-- Decorative Background Element -->
+<div class="absolute inset-0 opacity-10 pointer-events-none">
+<img class="w-full h-full object-cover" data-alt="A sophisticated abstract dark digital background featuring flowing geometric ribbons and ethereal particles in deep charcoal and neon blue. The style is ultra-modern and cinematic, suggesting high-speed data processing and professional video editing software aesthetic. The lighting is low-key with subtle highlights on the edges of the abstract forms." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCFGsBx5QqM9mlold0hvYm32n_G7ws46EmeIh5LQV7BHGhfoYYfh4d8hZD8b5umWlBNS8z4nPVeLHPcrAzA_NP8RwolgyiI_3wx80Il7dROQpy1sI8dNUd1xUR6FNQxBms3g0-5xwRNtmh3GqLplCCQZjPktZN9m1pyHTPkAh3lLxbUm_s6fDvFznvwD_Sh7aWpVwfTj1IkLgrwZoQSvn203vGG15W-2ta5U9gou0LJWiE7J7X9AZAnuyJIodH_7yWDcdNnqei_v-Xi"/>
+</div>
+<div class="z-10 flex flex-col items-center">
+<div class="w-16 h-16 bg-primary-container rounded-full flex items-center justify-center text-on-primary-container mb-4 shadow-xl">
+<span class="material-symbols-outlined text-3xl">add</span>
+</div>
+<h3 class="font-title-lg text-title-lg font-bold">+ 选择文件</h3>
+<p class="text-on-surface-variant font-body-md text-body-md mt-1">已选择 0 个文件</p>
+</div>
+<div class="z-10 mt-4 flex flex-wrap justify-center gap-2 px-8">
+<span class="px-2 py-1 bg-surface-variant rounded font-code-sm text-code-sm uppercase">mp4</span>
+<span class="px-2 py-1 bg-surface-variant rounded font-code-sm text-code-sm uppercase">mkv</span>
+<span class="px-2 py-1 bg-surface-variant rounded font-code-sm text-code-sm uppercase">wav</span>
+<span class="px-2 py-1 bg-surface-variant rounded font-code-sm text-code-sm uppercase">srt</span>
+<span class="px-2 py-1 bg-surface-variant rounded font-code-sm text-code-sm text-on-surface-variant">+5 more</span>
+</div>
+</div>
+</section>
+<!-- Task Queue -->
+<section class="px-edge-margin flex flex-col gap-stack-md">
+<div class="flex justify-between items-end">
+<h2 class="font-title-lg text-title-lg">任务队列 (4)</h2>
+<button class="material-symbols-outlined text-on-surface-variant text-xl">delete_sweep</button>
+</div>
+<!-- Task Items -->
+<div class="flex flex-col gap-stack-sm">
+<!-- Processing Task -->
+<div class="bg-surface-container-high p-4 rounded-xl border-l-4 border-primary shadow-sm">
+<div class="flex justify-between items-start mb-3">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-primary/10 rounded flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">movie</span>
+</div>
+<div class="flex flex-col">
+<span class="font-body-lg text-body-lg truncate max-w-[200px]">vlog_summer_trip_01.mp4</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant">428.5 MB • 正在转录...</span>
+</div>
+</div>
+<span class="text-primary font-label-lg text-label-lg">45%</span>
+</div>
+<div class="w-full bg-surface-variant h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[45%] transition-all duration-1000"></div>
+</div>
+</div>
+<!-- Waiting Task -->
+<div class="bg-surface-container p-4 rounded-xl border border-outline-variant/10">
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-surface-variant rounded flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface-variant">audio_file</span>
+</div>
+<div class="flex flex-col">
+<span class="font-body-lg text-body-lg truncate max-w-[200px]">podcast_episode_12.mp3</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant">12.2 MB • 等待中</span>
+</div>
+</div>
+<button class="material-symbols-outlined text-on-surface-variant">more_vert</button>
+</div>
+</div>
+<!-- Done Task -->
+<div class="bg-surface-container p-4 rounded-xl border border-outline-variant/10">
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-success/10 rounded flex items-center justify-center">
+<span class="material-symbols-outlined text-success">check_circle</span>
+</div>
+<div class="flex flex-col">
+<span class="font-body-lg text-body-lg truncate max-w-[200px]">final_presentation.srt</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant">45 KB • 已完成</span>
+</div>
+</div>
+<button class="material-symbols-outlined text-primary">download</button>
+</div>
+</div>
+<!-- Failed Task -->
+<div class="bg-surface-container p-4 rounded-xl border border-outline-variant/10">
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-error/10 rounded flex items-center justify-center">
+<span class="material-symbols-outlined text-error">error</span>
+</div>
+<div class="flex flex-col">
+<span class="font-body-lg text-body-lg truncate max-w-[200px]">corrupted_video.mkv</span>
+<span class="font-code-sm text-code-sm text-error">解析失败 • 文件损坏</span>
+</div>
+</div>
+<button class="material-symbols-outlined text-on-surface-variant">replay</button>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Collapsible Config Drawer (Fixed at bottom above nav) -->
+<div class="fixed bottom-[72px] left-0 w-full z-40 transition-transform duration-300 transform translate-y-[calc(100%-48px)]" id="config-drawer">
+<div class="bg-surface-container-high rounded-t-3xl shadow-2xl border-t border-outline-variant/30">
+<!-- Handle -->
+<button class="w-full h-12 flex items-center justify-center" onclick="toggleConfig()">
+<div class="w-10 h-1 w-8 bg-outline-variant rounded-full"></div>
+</button>
+<div class="px-edge-margin pb-6 flex flex-col gap-stack-lg">
+<div class="flex items-center justify-between">
+<h3 class="font-title-lg text-title-lg">全局配置</h3>
+<span class="material-symbols-outlined text-on-surface-variant">settings</span>
+</div>
+<div class="grid grid-cols-1 gap-stack-md">
+<!-- Language Selector -->
+<div class="flex flex-col gap-1">
+<label class="font-label-lg text-label-lg text-on-surface-variant">目标语言</label>
+<div class="bg-surface-variant p-3 rounded-xl flex items-center justify-between active:bg-surface-bright transition-colors">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-sm">language</span>
+<span class="font-body-md text-body-md">中文 (简体)</span>
+</div>
+<span class="material-symbols-outlined">expand_more</span>
+</div>
+</div>
+<!-- Precision Mode -->
+<div class="flex flex-col gap-1">
+<label class="font-label-lg text-label-lg text-on-surface-variant">识别模式</label>
+<div class="grid grid-cols-3 gap-2 bg-surface-variant p-1 rounded-xl">
+<button class="py-2 text-center font-label-lg text-label-lg rounded-lg transition-all text-on-surface-variant">快速</button>
+<button class="py-2 text-center font-label-lg text-label-lg rounded-lg bg-secondary-container text-on-secondary-container shadow-sm">平衡</button>
+<button class="py-2 text-center font-label-lg text-label-lg rounded-lg transition-all text-on-surface-variant">高质量</button>
+</div>
+</div>
+<!-- Output Directory -->
+<div class="flex flex-col gap-1">
+<label class="font-label-lg text-label-lg text-on-surface-variant">保存目录</label>
+<div class="bg-surface-variant p-3 rounded-xl flex items-center justify-between truncate">
+<div class="flex items-center gap-2 overflow-hidden">
+<span class="material-symbols-outlined text-on-surface-variant text-sm">folder_open</span>
+<span class="font-body-md text-body-md truncate">/storage/emulated/0/LemonSubtitle/Output</span>
+</div>
+<span class="material-symbols-outlined text-primary">edit</span>
+</div>
+</div>
+</div>
+<button class="w-full bg-primary-container text-on-primary-container py-4 rounded-xl font-headline-md text-title-lg font-bold active:scale-95 transition-transform">
+                    开始全部任务
+                </button>
+</div>
+</div>
+</div>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 w-full z-50 flex justify-around items-center px-gutter py-2 bg-surface-container">
+<!-- Studio Active -->
+<button class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-xl px-5 py-1 active:scale-90 duration-150">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">workspaces</span>
+<span class="font-label-lg text-label-lg">Studio</span>
+</button>
+<!-- Subtitle Edit -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant px-5 py-1 hover:bg-surface-bright transition-all active:scale-90 duration-150">
+<span class="material-symbols-outlined">movie_edit</span>
+<span class="font-label-lg text-label-lg">Subtitle Edit</span>
+</button>
+<!-- Model -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant px-5 py-1 hover:bg-surface-bright transition-all active:scale-90 duration-150">
+<span class="material-symbols-outlined">database</span>
+<span class="font-label-lg text-label-lg">Model</span>
+</button>
+<!-- Settings -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant px-5 py-1 hover:bg-surface-bright transition-all active:scale-90 duration-150">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-lg text-label-lg">Settings</span>
+</button>
+</nav>
+<script>
+        let configOpen = false;
+        function toggleConfig() {
+            const drawer = document.getElementById('config-drawer');
+            if (configOpen) {
+                drawer.style.transform = 'translateY(calc(100% - 48px))';
+            } else {
+                drawer.style.transform = 'translateY(0)';
+            }
+            configOpen = !configOpen;
+        }
+
+        // Pulse animation for processing bar
+        setInterval(() => {
+            const bar = document.querySelector('.bg-primary.h-full');
+            if (bar) {
+                let currentWidth = parseInt(bar.style.width) || 45;
+                if (currentWidth >= 95) currentWidth = 10;
+                bar.style.width = (currentWidth + 2) + '%';
+                document.querySelector('.text-primary.font-label-lg').innerText = bar.style.width;
+            }
+        }, 1500);
+    </script>
+</body></html>

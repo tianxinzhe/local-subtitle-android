@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">LemonSubtitle</string>
+    <string name="studio">Studio</string>
+    <string name="subtitle_edit">Edit</string>
+    <string name="model_manager">Model</string>
+    <string name="settings">Settings</string>
+
+    <string name="quick_actions">Quick Actions</string>
+    <string name="extract_audio">Extract Audio</string>
+    <string name="transcribe">Transcribe</string>
+    <string name="translate_subtitle">Translate Subs</string>
+    <string name="auto_pipeline">Auto Pipeline</string>
+
+    <string name="select_files">+ Select Files</string>
+    <string name="files_selected">%d file(s) selected</string>
+    <string name="task_queue">Task Queue (%d)</string>
+
+    <string name="processing">Processing</string>
+    <string name="waiting">Waiting</string>
+    <string name="completed">Completed</string>
+    <string name="failed">Failed</string>
+    <string name="file_corrupted">File corrupted</string>
+
+    <string name="config">Configuration</string>
+    <string name="precision_mode">Recognition Mode</string>
+    <string name="fast">Fast</string>
+    <string name="balanced">Balanced</string>
+    <string name="high_quality">High Quality</string>
+    <string name="start_all">Start All Tasks</string>
+
+    <string name="export">Export Subtitles</string>
+    <string name="export_format">Export Format</string>
+    <string name="bilingual_preview">Bilingual Preview</string>
+
+    <string name="model_management">Model Management</string>
+    <string name="imported_models">Imported Models</string>
+    <string name="recommended_download">Recommended Downloads</string>
+    <string name="import_model">Import Model</string>
+    <string name="select_model_file">Select Model File</string>
+
+    <string name="default_target_language">Default Target Language</string>
+    <string name="default_output_dir">Default Output Directory</string>
+    <string name="app_language">App Language</string>
+    <string name="system_default">System Default</string>
+    <string name="about">About</string>
+    <string name="version">Version</string>
+    <string name="open_source">Open Source Licenses</string>
+    <string name="privacy_policy">Privacy Policy</string>
+
+    <string name="chinese_simplified">Chinese (Simplified)</string>
+    <string name="download_hint">Visit huggingface.co to download models</string>
+</resources>
