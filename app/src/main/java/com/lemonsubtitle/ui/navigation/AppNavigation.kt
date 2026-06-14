@@ -1,8 +1,5 @@
 package com.lemonsubtitle.ui.navigation
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -26,10 +23,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.lemonsubtitle.ui.screens.ModelManagerScreen
 import com.lemonsubtitle.ui.screens.SettingsScreen
 import com.lemonsubtitle.ui.screens.StudioScreen
@@ -55,40 +54,44 @@ fun LemonSubtitleApp() {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 
+    val hideBottomBar = currentDestination?.route?.startsWith("subtitle_edit") == true
+
     Scaffold(
         bottomBar = {
-            NavigationBar(
-                containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                contentColor = MaterialTheme.colorScheme.onSurface
-            ) {
-                navItems.forEach { item ->
-                    val selected = currentDestination?.hierarchy?.any { it.route == item.screen.route } == true
-                    NavigationBarItem(
-                        selected = selected,
-                        onClick = {
-                            navController.navigate(item.screen.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
+            if (!hideBottomBar) {
+                NavigationBar(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    contentColor = MaterialTheme.colorScheme.onSurface
+                ) {
+                    navItems.forEach { item ->
+                        val selected = currentDestination?.hierarchy?.any { it.route == item.screen.route } == true
+                        NavigationBarItem(
+                            selected = selected,
+                            onClick = {
+                                navController.navigate(item.screen.route) {
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
                                 }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        },
-                        icon = {
-                            Icon(
-                                imageVector = if (selected) item.selectedIcon else item.unselectedIcon,
-                                contentDescription = item.label
+                            },
+                            icon = {
+                                Icon(
+                                    imageVector = if (selected) item.selectedIcon else item.unselectedIcon,
+                                    contentDescription = item.label
+                                )
+                            },
+                            label = { Text(item.label) },
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                                selectedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                                indicatorColor = MaterialTheme.colorScheme.secondaryContainer,
+                                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
                             )
-                        },
-                        label = { Text(item.label) },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                            selectedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                            indicatorColor = MaterialTheme.colorScheme.secondaryContainer,
-                            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                            unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                    )
+                    }
                 }
             }
         }
@@ -98,8 +101,17 @@ fun LemonSubtitleApp() {
             startDestination = Screen.Studio.route,
             modifier = Modifier.padding(innerPadding)
         ) {
-            composable(Screen.Studio.route) { StudioScreen() }
-            composable(Screen.SubtitleEdit.route) { SubtitleEditScreen() }
+            composable(Screen.Studio.route) { StudioScreen(navController = navController) }
+            composable(
+                route = Screen.SubtitleEdit.route,
+                arguments = listOf(navArgument("uri") {
+                    type = NavType.StringType
+                    defaultValue = ""
+                })
+            ) { backStackEntry ->
+                val uri = backStackEntry.arguments?.getString("uri") ?: ""
+                SubtitleEditScreen(fileUri = uri, onBack = { navController.popBackStack() })
+            }
             composable(Screen.ModelManager.route) { ModelManagerScreen() }
             composable(Screen.Settings.route) { SettingsScreen() }
         }

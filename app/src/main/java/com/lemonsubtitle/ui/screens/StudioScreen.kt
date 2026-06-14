@@ -1,6 +1,13 @@
 package com.lemonsubtitle.ui.screens
 
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.provider.OpenableColumns
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.navigation.NavController
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -27,14 +34,11 @@ import androidx.compose.material.icons.filled.AudioFile
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DeleteSweep
-import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.Translate
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -43,7 +47,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
@@ -55,16 +58,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.lemonsubtitle.service.ProcessingManager
+import com.lemonsubtitle.ui.navigation.Screen
 import com.lemonsubtitle.ui.theme.Success
-import com.lemonsubtitle.ui.theme.Warning
 
 data class TaskItem(
     val id: Int,
@@ -77,19 +84,47 @@ data class TaskItem(
 
 enum class TaskStatus { PROCESSING, WAITING, COMPLETED, FAILED }
 
-private val sampleTasks = listOf(
-    TaskItem(1, "vlog_summer_trip_01.mp4", "428.5 MB", "video", TaskStatus.PROCESSING, 45),
-    TaskItem(2, "podcast_episode_12.mp3", "12.2 MB", "audio", TaskStatus.WAITING),
-    TaskItem(3, "final_presentation.srt", "45 KB", "subtitle", TaskStatus.COMPLETED),
-    TaskItem(4, "corrupted_video.mkv", "210 MB", "video", TaskStatus.FAILED)
-)
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun StudioScreen() {
+fun StudioScreen(navController: NavController? = null) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     var selectedOperation by remember { mutableIntStateOf(0) }
     var selectedMode by remember { mutableIntStateOf(1) }
-    val tasks = remember { sampleTasks }
+    var selectedFiles by remember { mutableStateOf<List<SelectedFile>>(emptyList()) }
+    var processing by remember { mutableStateOf(false) }
+
+    val filePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenMultipleDocuments()
+    ) { uris ->
+        selectedFiles = uris.mapNotNull { uri -> getFileInfo(context, uri) }
+        uris.forEach { uri ->
+            try {
+                context.contentResolver.takePersistableUriPermission(
+                    uri, Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+            } catch (_: Exception) {}
+        }
+    }
+
+    var tasks by remember(selectedFiles) {
+        mutableStateOf(
+            if (selectedFiles.isEmpty()) {
+                listOf(
+                    TaskItem(0, "vlog_summer_trip_01.mp4", "428.5 MB", "video", TaskStatus.WAITING),
+                    TaskItem(1, "podcast_episode_12.mp3", "12.2 MB", "audio", TaskStatus.WAITING),
+                )
+            } else selectedFiles.mapIndexed { index, file ->
+                TaskItem(
+                    id = index,
+                    name = file.name,
+                    size = formatSize(file.size),
+                    type = file.type,
+                    status = TaskStatus.WAITING
+                )
+            }
+        )
+    }
 
     Column(modifier = Modifier.fillMaxSize()) {
         TopAppBar(
@@ -153,7 +188,15 @@ fun StudioScreen() {
                         .padding(horizontal = 16.dp)
                         .fillMaxWidth()
                         .aspectRatio(16f / 9f)
-                        .clickable { },
+                        .clickable {
+                            filePickerLauncher.launch(
+                                arrayOf(
+                                    "video/mp4", "video/x-matroska", "video/quicktime",
+                                    "audio/mpeg", "audio/wav", "audio/mp4", "audio/ogg",
+                                    "text/plain", "text/vtt"
+                                )
+                            )
+                        },
                     shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest)
                 ) {
@@ -184,18 +227,19 @@ fun StudioScreen() {
                             }
                             Spacer(Modifier.height(12.dp))
                             Text(
-                                "+ 选择文件",
+                                if (selectedFiles.isEmpty()) "+ 选择文件" else "已选择 ${selectedFiles.size} 个文件",
                                 style = MaterialTheme.typography.titleLarge,
                                 color = MaterialTheme.colorScheme.onBackground
                             )
                             Text(
-                                "已选择 0 个文件",
+                                if (selectedFiles.isEmpty()) "点击选择视频、音频或字幕文件"
+                                else "点击继续添加更多文件",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             Spacer(Modifier.height(12.dp))
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                listOf("mp4", "mkv", "wav", "srt").forEach { ext ->
+                                listOf("mp4", "mkv", "mov", "mp3", "wav", "srt", "vtt").forEach { ext ->
                                     Text(
                                         ext.uppercase(),
                                         modifier = Modifier
@@ -206,11 +250,6 @@ fun StudioScreen() {
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
-                                Text(
-                                    "+5 more",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
                             }
                         }
                     }
@@ -226,22 +265,36 @@ fun StudioScreen() {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        "任务队列 (${tasks.size})",
+                        "任务队列 (${tasks.toList().size})",
                         style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.onBackground
                     )
-                    IconButton(onClick = { }) {
-                        Icon(
-                            Icons.Default.DeleteSweep,
-                            contentDescription = "清空",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                    if (selectedFiles.isNotEmpty()) {
+                        IconButton(onClick = { selectedFiles = emptyList() }) {
+                            Icon(
+                                Icons.Default.DeleteSweep,
+                                contentDescription = "清空",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
             }
 
-            items(tasks) { task ->
-                TaskCard(task)
+            items(tasks.toList()) { task ->
+                TaskCard(
+                    task = task,
+                    onClick = {
+                        if (selectedFiles.isNotEmpty() && task.type == "subtitle") {
+                            val file = selectedFiles.getOrNull(task.id)
+                            if (file != null) {
+                                navController?.navigate(
+                                    Screen.SubtitleEdit.createRoute(file.uri.toString())
+                                )
+                            }
+                        }
+                    }
+                )
             }
 
             item {
@@ -284,11 +337,45 @@ fun StudioScreen() {
                     Spacer(Modifier.height(16.dp))
 
                     FilledTonalButton(
-                        onClick = { },
+                        onClick = {
+                            if (selectedFiles.isNotEmpty() && !processing) {
+                                processing = true
+                                scope.launch {
+                                    val fileList = selectedFiles.toList()
+                                    for ((i, file) in fileList.withIndex()) {
+                                        tasks = tasks.toMutableList().also { it[i] = it[i].copy(status = TaskStatus.PROCESSING) }
+                                        val result = ProcessingManager.processFile(
+                                            context = context,
+                                            fileUri = file.uri,
+                                            fileName = file.name,
+                                            fileType = file.type,
+                                            onProgress = { progress ->
+                                                tasks = tasks.toMutableList().also {
+                                                    it[i] = it[i].copy(
+                                                        progress = (progress.progress * 100).toInt()
+                                                    )
+                                                }
+                                            }
+                                        )
+                                        tasks = tasks.toMutableList().also {
+                                            it[i] = it[i].copy(
+                                                status = if (result.success) TaskStatus.COMPLETED else TaskStatus.FAILED,
+                                                progress = if (result.success) 100 else 0
+                                            )
+                                        }
+                                    }
+                                    processing = false
+                                }
+                            }
+                        },
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp)
+                        shape = RoundedCornerShape(12.dp),
+                        enabled = !processing
                     ) {
-                        Text("开始全部任务", style = MaterialTheme.typography.titleMedium)
+                        Text(
+                            if (processing) "处理中..." else "开始全部任务",
+                            style = MaterialTheme.typography.titleMedium
+                        )
                     }
                 }
             }
@@ -298,6 +385,44 @@ fun StudioScreen() {
             }
         }
     }
+}
+
+private data class SelectedFile(
+    val uri: Uri,
+    val name: String,
+    val size: Long,
+    val type: String
+)
+
+private fun getFileInfo(context: Context, uri: Uri): SelectedFile? {
+    val cursor = context.contentResolver.query(uri, null, null, null, null) ?: return null
+    return cursor.use {
+        if (it.moveToFirst()) {
+            val nameIdx = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+            val sizeIdx = it.getColumnIndex(OpenableColumns.SIZE)
+            val name = if (nameIdx >= 0) it.getString(nameIdx) else uri.lastPathSegment ?: "Unknown"
+            val size = if (sizeIdx >= 0 && it.getLong(sizeIdx) >= 0) it.getLong(sizeIdx) else 0L
+            val type = when {
+                name.endsWith(".srt", true) || name.endsWith(".vtt", true) -> "subtitle"
+                name.endsWith(".mp3", true) || name.endsWith(".wav", true) || name.endsWith(".m4a", true) || name.endsWith(".ogg", true) -> "audio"
+                else -> "video"
+            }
+            SelectedFile(uri = uri, name = name, size = size, type = type)
+        } else null
+    }
+}
+
+private fun formatSize(bytes: Long): String {
+    if (bytes <= 0) return "Unknown"
+    val units = arrayOf("B", "KB", "MB", "GB")
+    var value = bytes.toDouble()
+    var unitIdx = 0
+    while (value >= 1024 && unitIdx < 3) {
+        value /= 1024
+        unitIdx++
+    }
+    return if (unitIdx > 0) "%.1f %s".format(value, units[unitIdx])
+    else "%.0f %s".format(value, units[unitIdx])
 }
 
 @Composable
@@ -342,11 +467,12 @@ private fun OperationCard(
 }
 
 @Composable
-private fun TaskCard(task: TaskItem) {
+private fun TaskCard(task: TaskItem, onClick: (() -> Unit)? = null) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 16.dp)
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
             containerColor = when (task.status) {

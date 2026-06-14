@@ -3,13 +3,16 @@ project("lemonsubtitle")
 
 add_library(lemonsubtitle SHARED
     whisper_bridge.cpp
+    ffmpeg_bridge.cpp
 )
 
 # Find whisper.cpp - users should clone whisper.cpp into app/src/main/cpp/
 if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/whisper.cpp)
+    set(GGML_OPENMP OFF CACHE BOOL "" FORCE)
     add_subdirectory(whisper.cpp)
     target_link_libraries(lemonsubtitle whisper)
-    target_include_directories(lemonsubtitle PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/whisper.cpp)
+    target_include_directories(lemonsubtitle PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/whisper.cpp/include)
+    target_compile_definitions(lemonsubtitle PRIVATE WHISPER_AVAILABLE)
 endif()
 
 # Find ffmpeg-android

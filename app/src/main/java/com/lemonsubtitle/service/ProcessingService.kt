@@ -17,12 +17,44 @@ class ProcessingService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val notification = createNotification()
+        val notification = createNotification("准备处理...", 0)
         startForeground(NOTIFICATION_ID, notification)
         return START_NOT_STICKY
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
+
+    fun updateProgress(message: String, progress: Int) {
+        val notification = createNotification(message, progress)
+        val manager = getSystemService(NotificationManager::class.java)
+        manager.notify(NOTIFICATION_ID, notification)
+    }
+
+    fun onComplete() {
+        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle("LemonSubtitle")
+            .setContentText("处理完成")
+            .setSmallIcon(android.R.drawable.ic_menu_edit)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .build()
+        val manager = getSystemService(NotificationManager::class.java)
+        manager.notify(NOTIFICATION_ID, notification)
+        stopForeground(STOP_FOREGROUND_REMOVE)
+        stopSelf()
+    }
+
+    fun onError(error: String) {
+        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle("LemonSubtitle")
+            .setContentText("处理失败: $error")
+            .setSmallIcon(android.R.drawable.ic_menu_edit)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .build()
+        val manager = getSystemService(NotificationManager::class.java)
+        manager.notify(NOTIFICATION_ID, notification)
+        stopForeground(STOP_FOREGROUND_REMOVE)
+        stopSelf()
+    }
 
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -38,12 +70,14 @@ class ProcessingService : Service() {
         }
     }
 
-    private fun createNotification(): Notification {
+    private fun createNotification(message: String, progress: Int): Notification {
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("LemonSubtitle")
-            .setContentText("Processing subtitles...")
+            .setContentText(message)
             .setSmallIcon(android.R.drawable.ic_menu_edit)
             .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setProgress(100, progress, progress == 0)
+            .setOngoing(true)
             .build()
     }
 
