@@ -22,9 +22,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Database
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.OpenInNew
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.UploadFile
@@ -32,16 +34,20 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,15 +55,21 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.lemonsubtitle.data.DownloadStatus
 import com.lemonsubtitle.data.ImportedModel
+import com.lemonsubtitle.data.ModelDownloadManager
 import com.lemonsubtitle.data.ModelManager
 import com.lemonsubtitle.ui.theme.Success
+import com.lemonsubtitle.ui.theme.Warning
+import kotlinx.coroutines.launch
 
 @Composable
 fun ModelManagerScreen() {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     var models by remember { mutableStateOf(listOf<ImportedModel>()) }
     var showDeleteDialog by remember { mutableStateOf<ImportedModel?>(null) }
+    val downloadProgress by ModelDownloadManager.progress.collectAsState()
 
     LaunchedEffect(Unit) {
         models = ModelManager.listModels(context)
@@ -201,42 +213,35 @@ fun ModelManagerScreen() {
 
             Spacer(Modifier.height(12.dp))
 
-            listOf(
-                Triple("Whisper tiny", "75MB • 极速识别，低准确率", false),
-                Triple("Whisper base", "142MB • 均衡速度与效果", false),
-                Triple("Whisper small", "466MB • 高准确率，推荐使用", true)
-            ).forEach { (name, desc, imported) ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(name, style = MaterialTheme.typography.titleLarge)
-                        Text(desc, style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
-                    if (imported) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.CheckCircle, null,
-                                tint = Success, modifier = Modifier.size(18.dp))
-                            Spacer(Modifier.width(4.dp))
-                            Text("已就绪", style = MaterialTheme.typography.labelLarge,
-                                color = Success)
+            ModelDownloadManager.availableModels.forEach { modelInfo ->
+                val progressData = downloadProgress[modelInfo.id]
+                val isDownloaded = models.any { it.name == modelInfo.name }
+                val isDownloading = progressData?.status == DownloadStatus.DOWNLOADING
+                val isValidating = progressData?.status == DownloadStatus.VALIDATING
+                val isFailed = progressData?.status == DownloadStatus.FAILED
+                val isCompleted = progressData?.status == DownloadStatus.COMPLETED
+
+                ModelDownloadCard(
+                    modelInfo = modelInfo,
+                    isDownloaded = isDownloaded,
+                    progressData = progressData,
+                    onDownload = {
+                        scope.launch {
+                            ModelDownloadManager.downloadModel(context, modelInfo) { }
+                            models = ModelManager.listModels(context)
                         }
-                    } else {
-                        FilledTonalButton(
-                            onClick = { },
-                            shape = RoundedCornerShape(20.dp)
-                        ) {
-                            Icon(Icons.Default.Download, null, modifier = Modifier.size(18.dp))
+                    },
+                    onCancel = {
+                        ModelDownloadManager.cancelDownload(modelInfo.id)
+                    },
+                    onRetry = {
+                        ModelDownloadManager.resetProgress(modelInfo.id)
+                        scope.launch {
+                            ModelDownloadManager.downloadModel(context, modelInfo) { }
+                            models = ModelManager.listModels(context)
                         }
                     }
-                }
+                )
             }
 
             Spacer(Modifier.height(24.dp))
@@ -294,5 +299,118 @@ fun ModelManagerScreen() {
                 }
             }
         )
+    }
+}
+
+@Composable
+private fun ModelDownloadCard(
+    modelInfo: com.lemonsubtitle.data.ModelInfo,
+    isDownloaded: Boolean,
+    progressData: com.lemonsubtitle.data.DownloadProgress?,
+    onDownload: () -> Unit,
+    onCancel: () -> Unit,
+    onRetry: () -> Unit
+) {
+    val isDownloading = progressData?.status == DownloadStatus.DOWNLOADING
+    val isValidating = progressData?.status == DownloadStatus.VALIDATING
+    val isFailed = progressData?.status == DownloadStatus.FAILED
+    val isCompleted = progressData?.status == DownloadStatus.COMPLETED
+    val showProgress = isDownloading || isValidating
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+            .padding(16.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(modelInfo.name, style = MaterialTheme.typography.titleLarge)
+                Text("${modelInfo.sizeMb} • ${modelInfo.description}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            when {
+                isDownloaded || isCompleted -> {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.CheckCircle, null,
+                            tint = Success, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(4.dp))
+                        Text("已就绪", style = MaterialTheme.typography.labelLarge,
+                            color = Success)
+                    }
+                }
+                isFailed -> {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.Error, null,
+                            tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(4.dp))
+                        TextButton(onClick = onRetry) {
+                            Text("重试", color = MaterialTheme.colorScheme.error)
+                        }
+                    }
+                }
+                showProgress -> {
+                    OutlinedButton(
+                        onClick = onCancel,
+                        shape = RoundedCornerShape(20.dp)
+                    ) {
+                        Icon(Icons.Default.Close, null, modifier = Modifier.size(16.dp))
+                        Spacer(Modifier.width(4.dp))
+                        Text("取消")
+                    }
+                }
+                else -> {
+                    FilledTonalButton(
+                        onClick = onDownload,
+                        shape = RoundedCornerShape(20.dp)
+                    ) {
+                        Icon(Icons.Default.Download, null, modifier = Modifier.size(18.dp))
+                    }
+                }
+            }
+        }
+
+        if (showProgress && progressData != null) {
+            Spacer(Modifier.height(8.dp))
+            LinearProgressIndicator(
+                progress = { progressData.progress.coerceIn(0f, 1f) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(6.dp)
+                    .clip(RoundedCornerShape(3.dp)),
+                color = if (isValidating) MaterialTheme.colorScheme.tertiary
+                        else MaterialTheme.colorScheme.primary,
+                trackColor = MaterialTheme.colorScheme.surfaceVariant,
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                when {
+                    isValidating -> "校验文件格式..."
+                    progressData.totalBytes > 0 -> {
+                        val downloadedMb = "%.1f".format(progressData.downloadedBytes / (1024.0 * 1024.0))
+                        val totalMb = "%.1f".format(progressData.totalBytes / (1024.0 * 1024.0))
+                        "$downloadedMb / $totalMb MB • ${(progressData.progress * 100).toInt()}%"
+                    }
+                    else -> "下载中..."
+                },
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
+        if (isFailed && progressData?.error?.isNotEmpty() == true) {
+            Spacer(Modifier.height(4.dp))
+            Text(
+                progressData.error,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error
+            )
+        }
     }
 }
