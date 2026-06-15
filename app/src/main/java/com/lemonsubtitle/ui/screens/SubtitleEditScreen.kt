@@ -1,6 +1,5 @@
 package com.lemonsubtitle.ui.screens
 
-import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -13,7 +12,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -28,19 +26,16 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.ClosedCaption
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.SkipNext
-import androidx.compose.material.icons.filled.VolumeUp
+import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -55,21 +50,24 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import com.lemonsubtitle.model.SubtitleLine
 import com.lemonsubtitle.model.SubtitleParser
+import com.lemonsubtitle.service.TranslationHelper
+import com.lemonsubtitle.ui.components.VideoPlayer
+import com.lemonsubtitle.ui.components.WaveformView
+import kotlinx.coroutines.launch
 
 private val sampleSubtitles = listOf(
     SubtitleLine(250000, 254500, "这是一个带有电影质感的日本风景空镜。", "This is a cinematic empty shot of Japanese scenery."),
@@ -83,12 +81,24 @@ private val sampleSubtitles = listOf(
 @Composable
 fun SubtitleEditScreen(fileUri: String = "", onBack: () -> Unit = {}) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     var showExportDialog by remember { mutableStateOf(false) }
     var showBilingualPreview by remember { mutableStateOf(true) }
     var subtitles by remember { mutableStateOf(sampleSubtitles) }
     var selectedIndex by remember { mutableStateOf(-1) }
     var isLoading by remember { mutableStateOf(fileUri.isNotEmpty()) }
     var exportFormat by remember { mutableStateOf("srt") }
+    var activeTab by remember { mutableStateOf(0) }
+    var currentTimeMs by remember { mutableLongStateOf(0L) }
+    var translatingIndex by remember { mutableStateOf(-1) }
+
+    val totalDurationMs = remember(subtitles) {
+        subtitles.maxOfOrNull { it.endMs } ?: 300000L
+    }
+
+    val videoUri = remember(fileUri) {
+        if (fileUri.isNotEmpty()) Uri.parse(fileUri) else null
+    }
 
     val exportLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("text/plain")
@@ -96,10 +106,10 @@ fun SubtitleEditScreen(fileUri: String = "", onBack: () -> Unit = {}) {
         if (uri != null) {
             try {
                 val content = when (exportFormat) {
-                    "srt" -> com.lemonsubtitle.model.SubtitleParser.toSrt(subtitles)
-                    "vtt" -> com.lemonsubtitle.model.SubtitleParser.toVtt(subtitles)
-                    "ass" -> com.lemonsubtitle.model.SubtitleParser.toAss(subtitles)
-                    else -> com.lemonsubtitle.model.SubtitleParser.toSrt(subtitles)
+                    "srt" -> SubtitleParser.toSrt(subtitles)
+                    "vtt" -> SubtitleParser.toVtt(subtitles)
+                    "ass" -> SubtitleParser.toAss(subtitles)
+                    else -> SubtitleParser.toSrt(subtitles)
                 }
                 context.contentResolver.openOutputStream(uri)?.use { it.write(content.toByteArray()) }
             } catch (_: Exception) {}
@@ -126,10 +136,7 @@ fun SubtitleEditScreen(fileUri: String = "", onBack: () -> Unit = {}) {
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        "柠檬字幕工作室",
-                        style = MaterialTheme.typography.titleMedium
-                    )
+                    Text("柠檬字幕工作室", style = MaterialTheme.typography.titleMedium)
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
@@ -155,9 +162,7 @@ fun SubtitleEditScreen(fileUri: String = "", onBack: () -> Unit = {}) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Column {
                         Text(
                             "PREVIEW MODE",
@@ -205,84 +210,10 @@ fun SubtitleEditScreen(fileUri: String = "", onBack: () -> Unit = {}) {
             Column(
                 modifier = Modifier.fillMaxSize().padding(padding)
             ) {
-                Box(
+                VideoPlayer(
+                    videoUri = videoUri,
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(16f / 9f)
-                        .background(Color.Black),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        Icons.Default.PlayArrow,
-                        contentDescription = "播放",
-                        tint = Color.White.copy(alpha = 0.7f),
-                        modifier = Modifier.size(64.dp).clickable { }
-                    )
-
-                    Column(
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .fillMaxWidth()
-                            .background(
-                                Brush.verticalGradient(
-                                    colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.8f))
-                                )
-                            )
-                            .padding(16.dp)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(4.dp)
-                                .clip(RoundedCornerShape(2.dp))
-                                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth(0.33f)
-                                    .height(4.dp)
-                                    .clip(RoundedCornerShape(2.dp))
-                                    .background(MaterialTheme.colorScheme.primaryContainer)
-                            )
-                            Box(
-                                modifier = Modifier
-                                    .align(Alignment.CenterStart)
-                                    .fillMaxWidth(0.33f)
-                                    .height(4.dp)
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .align(Alignment.CenterEnd)
-                                        .size(12.dp)
-                                        .clip(CircleShape)
-                                        .background(MaterialTheme.colorScheme.primary)
-                                        .shadow(4.dp, CircleShape)
-                                )
-                            }
-                        }
-                        Spacer(Modifier.height(8.dp))
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                                Icon(Icons.Default.PlayArrow, null, tint = Color.White)
-                                Icon(Icons.Default.SkipNext, null, tint = Color.White)
-                                Icon(Icons.Default.VolumeUp, null, tint = Color.White)
-                                Text(
-                                    "00:04:12 / 00:12:34",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = Color.White
-                                )
-                            }
-                            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                                Icon(Icons.Default.ClosedCaption, null, tint = Color.White)
-                                Icon(Icons.Default.Fullscreen, null, tint = Color.White)
-                            }
-                        }
-                    }
-                }
+                )
 
                 Row(
                     modifier = Modifier
@@ -297,24 +228,45 @@ fun SubtitleEditScreen(fileUri: String = "", onBack: () -> Unit = {}) {
                             "编辑",
                             modifier = Modifier
                                 .clip(RoundedCornerShape(20.dp))
-                                .background(MaterialTheme.colorScheme.secondaryContainer)
+                                .background(
+                                    if (activeTab == 0) MaterialTheme.colorScheme.secondaryContainer
+                                    else MaterialTheme.colorScheme.surfaceContainer
+                                )
+                                .clickable { activeTab = 0 }
                                 .padding(horizontal = 12.dp, vertical = 4.dp),
                             style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                            color = if (activeTab == 0) MaterialTheme.colorScheme.onSecondaryContainer
+                            else MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
                             "波形",
                             modifier = Modifier
                                 .clip(RoundedCornerShape(20.dp))
+                                .background(
+                                    if (activeTab == 1) MaterialTheme.colorScheme.secondaryContainer
+                                    else MaterialTheme.colorScheme.surfaceContainer
+                                )
+                                .clickable { activeTab = 1 }
                                 .padding(horizontal = 12.dp, vertical = 4.dp),
                             style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = if (activeTab == 1) MaterialTheme.colorScheme.onSecondaryContainer
+                            else MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                     Row {
                         IconButton(onClick = { }) { Icon(Icons.Default.Search, null, tint = MaterialTheme.colorScheme.onSurfaceVariant) }
                         IconButton(onClick = { }) { Icon(Icons.Default.AddCircle, null, tint = MaterialTheme.colorScheme.onSurfaceVariant) }
                     }
+                }
+
+                if (activeTab == 1) {
+                    WaveformView(
+                        subtitleLines = subtitles,
+                        totalDurationMs = totalDurationMs,
+                        currentTimeMs = currentTimeMs,
+                        onSeek = { currentTimeMs = it },
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    )
                 }
 
                 LazyColumn(
@@ -340,7 +292,10 @@ fun SubtitleEditScreen(fileUri: String = "", onBack: () -> Unit = {}) {
                                         RoundedCornerShape(12.dp)
                                     )
                                 )
-                                .clickable { selectedIndex = index }
+                                .clickable {
+                                    selectedIndex = index
+                                    currentTimeMs = subtitle.startMs
+                                }
                                 .padding(12.dp)
                         ) {
                             Row(
@@ -354,11 +309,43 @@ fun SubtitleEditScreen(fileUri: String = "", onBack: () -> Unit = {}) {
                                     color = if (isSelected) MaterialTheme.colorScheme.primary
                                     else MaterialTheme.colorScheme.onSurfaceVariant
                                 )
-                                Icon(
-                                    Icons.Default.ContentCopy, null,
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.size(16.dp).clickable { }
-                                )
+                                Row {
+                                    IconButton(
+                                        onClick = {
+                                            translatingIndex = index
+                                            scope.launch {
+                                                val translated = TranslationHelper.translate(
+                                                    subtitle.text,
+                                                    "zh",
+                                                    "en"
+                                                )
+                                                subtitles = subtitles.toMutableList().also {
+                                                    it[index] = it[index].copy(translation = translated)
+                                                }
+                                                translatingIndex = -1
+                                            }
+                                        },
+                                        modifier = Modifier.size(24.dp)
+                                    ) {
+                                        if (translatingIndex == index) {
+                                            CircularProgressIndicator(
+                                                modifier = Modifier.size(16.dp),
+                                                strokeWidth = 2.dp
+                                            )
+                                        } else {
+                                            Icon(
+                                                Icons.Default.Translate, null,
+                                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                modifier = Modifier.size(16.dp)
+                                            )
+                                        }
+                                    }
+                                    Icon(
+                                        Icons.Default.ContentCopy, null,
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.size(16.dp).clickable { }
+                                    )
+                                }
                             }
                             Spacer(Modifier.height(4.dp))
                             var editText by remember(subtitle) { mutableStateOf(subtitle.text) }
@@ -436,11 +423,6 @@ fun SubtitleEditScreen(fileUri: String = "", onBack: () -> Unit = {}) {
                     }
                     FilledTonalButton(onClick = {
                         showExportDialog = false
-                        val mimeType = when (selectedFormat) {
-                            0 -> "application/x-subrip"
-                            1 -> "text/vtt"
-                            else -> "text/x-ssa"
-                        }
                         val extension = when (selectedFormat) {
                             0 -> ".srt"
                             1 -> ".vtt"

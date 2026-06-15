@@ -63,5 +63,7 @@ dependencies {
     implementation(libs.mlkit.translate)
     implementation(libs.datastore.preferences)
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.media3.exoplayer)
+    implementation(libs.media3.ui)
     debugImplementation(libs.androidx.ui.tooling)
 }

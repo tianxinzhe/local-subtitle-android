@@ -78,7 +78,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.lemonsubtitle.service.ProcessingManager
 import com.lemonsubtitle.ui.navigation.Screen
 import com.lemonsubtitle.ui.theme.Success
 
@@ -373,25 +372,12 @@ fun StudioScreen(navController: NavController? = null) {
                                     val fileList = selectedFiles.toList()
                                     for ((i, file) in fileList.withIndex()) {
                                         tasks = tasks.toMutableList().also { it[i] = it[i].copy(status = TaskStatus.PROCESSING) }
-                                        val result = ProcessingManager.processFile(
+                                        com.lemonsubtitle.service.ProcessingService.startProcessing(
                                             context = context,
-                                            fileUri = file.uri,
+                                            fileUri = file.uri.toString(),
                                             fileName = file.name,
-                                            fileType = file.type,
-                                            onProgress = { progress ->
-                                                tasks = tasks.toMutableList().also {
-                                                    it[i] = it[i].copy(
-                                                        progress = (progress.progress * 100).toInt()
-                                                    )
-                                                }
-                                            }
+                                            fileType = file.type
                                         )
-                                        tasks = tasks.toMutableList().also {
-                                            it[i] = it[i].copy(
-                                                status = if (result.success) TaskStatus.COMPLETED else TaskStatus.FAILED,
-                                                progress = if (result.success) 100 else 0
-                                            )
-                                        }
                                     }
                                     processing = false
                                 }
