@@ -127,4 +127,35 @@ object SubtitleParser {
         }
         return sb.toString()
     }
+
+    fun formatAssTimestamp(ms: Long): String {
+        val h = ms / 3600000
+        val m = (ms % 3600000) / 60000
+        val s = (ms % 60000) / 1000
+        val cs = (ms % 1000) / 10
+        return "%d:%02d:%02d.%02d".format(h, m, s, cs)
+    }
+
+    fun toAss(lines: List<SubtitleLine>): String {
+        val sb = StringBuilder()
+        sb.appendLine("[Script Info]")
+        sb.appendLine("Title: LemonSubtitle Export")
+        sb.appendLine("ScriptType: v4.00+")
+        sb.appendLine("PlayResX: 1920")
+        sb.appendLine("PlayResY: 1080")
+        sb.appendLine()
+        sb.appendLine("[V4+ Styles]")
+        sb.appendLine("Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding")
+        sb.appendLine("Style: Default,Arial,48,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,2,2,2,10,10,10,1")
+        sb.appendLine()
+        sb.appendLine("[Events]")
+        sb.appendLine("Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text")
+        for (line in lines) {
+            val start = formatAssTimestamp(line.startMs)
+            val end = formatAssTimestamp(line.endMs)
+            val text = line.text.replace("\n", "\\N")
+            sb.appendLine("Dialogue: 0,$start,$end,Default,,0,0,0,,$text")
+        }
+        return sb.toString()
+    }
 }

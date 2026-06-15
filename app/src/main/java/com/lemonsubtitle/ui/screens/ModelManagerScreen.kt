@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.Database
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.OpenInNew
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.UploadFile
@@ -105,7 +106,7 @@ fun ModelManagerScreen() {
             },
             navigationIcon = {
                 IconButton(onClick = { }) {
-                    Icon(Icons.Default.Search, null)
+                    Icon(Icons.Default.Menu, null)
                 }
             },
             actions = {

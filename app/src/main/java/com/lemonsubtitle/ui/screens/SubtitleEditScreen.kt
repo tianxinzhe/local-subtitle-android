@@ -45,6 +45,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -90,10 +92,11 @@ fun SubtitleEditScreen(fileUri: String = "", onBack: () -> Unit = {}) {
     ) { uri ->
         if (uri != null) {
             try {
-                val content = if (exportFormat == "srt") {
-                    com.lemonsubtitle.model.SubtitleParser.toSrt(subtitles)
-                } else {
-                    com.lemonsubtitle.model.SubtitleParser.toVtt(subtitles)
+                val content = when (exportFormat) {
+                    "srt" -> com.lemonsubtitle.model.SubtitleParser.toSrt(subtitles)
+                    "vtt" -> com.lemonsubtitle.model.SubtitleParser.toVtt(subtitles)
+                    "ass" -> com.lemonsubtitle.model.SubtitleParser.toAss(subtitles)
+                    else -> com.lemonsubtitle.model.SubtitleParser.toSrt(subtitles)
                 }
                 context.contentResolver.openOutputStream(uri)?.use { it.write(content.toByteArray()) }
             } catch (_: Exception) {}
@@ -150,14 +153,21 @@ fun SubtitleEditScreen(fileUri: String = "", onBack: () -> Unit = {}) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.clickable { showBilingualPreview = !showBilingualPreview }
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        if (showBilingualPreview) "双语预览 ✓" else "双语预览 ✗",
+                        "双语预览",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = if (showBilingualPreview) MaterialTheme.colorScheme.primary
-                                else MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Switch(
+                        checked = showBilingualPreview,
+                        onCheckedChange = { showBilingualPreview = it },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = MaterialTheme.colorScheme.primary,
+                            checkedTrackColor = MaterialTheme.colorScheme.primaryContainer
+                        )
                     )
                 }
                 FilledTonalButton(
@@ -366,7 +376,7 @@ fun SubtitleEditScreen(fileUri: String = "", onBack: () -> Unit = {}) {
             },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    listOf("SRT (标准格式)", "VTT (Web格式)").forEachIndexed { i, label ->
+                    listOf("SRT (标准格式)", "VTT (Web格式)", "ASS (高级字幕)").forEachIndexed { i, label ->
                         Button(
                             onClick = { selectedFormat = i },
                             modifier = Modifier.fillMaxWidth(),
@@ -395,9 +405,21 @@ fun SubtitleEditScreen(fileUri: String = "", onBack: () -> Unit = {}) {
                     }
                     FilledTonalButton(onClick = {
                         showExportDialog = false
-                        val mimeType = if (selectedFormat == 0) "application/x-subrip" else "text/vtt"
-                        val extension = if (selectedFormat == 0) ".srt" else ".vtt"
-                        exportFormat = if (selectedFormat == 0) "srt" else "vtt"
+                        val mimeType = when (selectedFormat) {
+                            0 -> "application/x-subrip"
+                            1 -> "text/vtt"
+                            else -> "text/x-ssa"
+                        }
+                        val extension = when (selectedFormat) {
+                            0 -> ".srt"
+                            1 -> ".vtt"
+                            else -> ".ass"
+                        }
+                        exportFormat = when (selectedFormat) {
+                            0 -> "srt"
+                            1 -> "vtt"
+                            else -> "ass"
+                        }
                         exportLauncher.launch("subtitles$extension")
                     }) {
                         Text("开始导出")

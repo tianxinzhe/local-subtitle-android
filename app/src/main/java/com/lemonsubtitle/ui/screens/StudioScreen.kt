@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -29,13 +30,15 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AudioFile
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.Error
-import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.Translate
@@ -47,12 +50,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -93,6 +98,8 @@ fun StudioScreen(navController: NavController? = null) {
     var selectedMode by remember { mutableIntStateOf(1) }
     var selectedFiles by remember { mutableStateOf<List<SelectedFile>>(emptyList()) }
     var processing by remember { mutableStateOf(false) }
+    var showConfigSheet by remember { mutableStateOf(false) }
+    val configSheetState = rememberModalBottomSheetState()
 
     val filePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenMultipleDocuments()
@@ -129,6 +136,19 @@ fun StudioScreen(navController: NavController? = null) {
     Column(modifier = Modifier.fillMaxSize()) {
         TopAppBar(
             title = { Text("柠檬字幕工作室") },
+            navigationIcon = {
+                IconButton(onClick = { }) {
+                    Icon(Icons.Default.Menu, contentDescription = "菜单")
+                }
+            },
+            actions = {
+                IconButton(onClick = { }) {
+                    Icon(Icons.Default.Notifications, contentDescription = "通知")
+                }
+                IconButton(onClick = { }) {
+                    Icon(Icons.Default.AccountCircle, contentDescription = "账户")
+                }
+            },
             colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = MaterialTheme.colorScheme.background,
                 titleContentColor = MaterialTheme.colorScheme.onBackground
@@ -308,33 +328,20 @@ fun StudioScreen(navController: NavController? = null) {
                         .padding(16.dp)
                 ) {
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { showConfigSheet = true },
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text("全局配置", style = MaterialTheme.typography.titleLarge)
+                        Text(
+                            when (selectedMode) { 0 -> "快速"; 1 -> "平衡"; else -> "高质量" },
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.primary
+                        )
                     }
                     Spacer(Modifier.height(12.dp))
-
-                    Text("识别模式", style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Spacer(Modifier.height(8.dp))
-                    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-                        listOf("快速", "平衡", "高质量").forEachIndexed { index, label ->
-                            SegmentedButton(
-                                selected = selectedMode == index,
-                                onClick = { selectedMode = index },
-                                shape = SegmentedButtonDefaults.itemShape(
-                                    index = index,
-                                    count = 3
-                                )
-                            ) {
-                                Text(label)
-                            }
-                        }
-                    }
-
-                    Spacer(Modifier.height(16.dp))
 
                     FilledTonalButton(
                         onClick = {
@@ -382,6 +389,43 @@ fun StudioScreen(navController: NavController? = null) {
 
             item {
                 Spacer(Modifier.height(80.dp))
+            }
+        }
+    }
+
+    if (showConfigSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showConfigSheet = false },
+            sheetState = configSheetState,
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp)
+            ) {
+                Text("全局配置", style = MaterialTheme.typography.titleLarge)
+                Spacer(Modifier.height(20.dp))
+
+                Text("识别模式", style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Spacer(Modifier.height(8.dp))
+                SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                    listOf("快速", "平衡", "高质量").forEachIndexed { index, label ->
+                        SegmentedButton(
+                            selected = selectedMode == index,
+                            onClick = { selectedMode = index },
+                            shape = SegmentedButtonDefaults.itemShape(
+                                index = index,
+                                count = 3
+                            )
+                        ) {
+                            Text(label)
+                        }
+                    }
+                }
+
+                Spacer(Modifier.height(24.dp))
             }
         }
     }
@@ -472,6 +516,11 @@ private fun TaskCard(task: TaskItem, onClick: (() -> Unit)? = null) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
+            .then(
+                if (task.status == TaskStatus.PROCESSING)
+                    Modifier.border(0.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(12.dp))
+                else Modifier
+            )
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
@@ -481,11 +530,21 @@ private fun TaskCard(task: TaskItem, onClick: (() -> Unit)? = null) {
             }
         )
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+        Row(modifier = Modifier.fillMaxWidth()) {
+            if (task.status == TaskStatus.PROCESSING) {
+                Box(
+                    modifier = Modifier
+                        .width(4.dp)
+                        .height(IntrinsicSize.Min)
+                        .clip(RoundedCornerShape(topStart = 12.dp, bottomStart = 12.dp))
+                        .background(MaterialTheme.colorScheme.primary)
+                )
+            }
+            Column(modifier = Modifier.weight(1f).padding(16.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                 Box(
                     modifier = Modifier
                         .size(40.dp)
