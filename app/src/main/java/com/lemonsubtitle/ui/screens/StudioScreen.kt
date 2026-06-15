@@ -37,10 +37,14 @@ import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.FolderOpen
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.Replay
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Subtitles
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -96,6 +100,8 @@ fun StudioScreen(navController: NavController? = null) {
     val scope = rememberCoroutineScope()
     var selectedOperation by remember { mutableIntStateOf(0) }
     var selectedMode by remember { mutableIntStateOf(1) }
+    var selectedLanguage by remember { mutableIntStateOf(0) }
+    var outputDir by remember { mutableStateOf("/storage/emulated/0/LemonSubtitle/Output") }
     var selectedFiles by remember { mutableStateOf<List<SelectedFile>>(emptyList()) }
     var processing by remember { mutableStateOf(false) }
     var showConfigSheet by remember { mutableStateOf(false) }
@@ -190,7 +196,7 @@ fun StudioScreen(navController: NavController? = null) {
                     OperationCard("提取音频", Icons.Default.AudioFile, MaterialTheme.colorScheme.primary, selectedOperation == 0) {
                         selectedOperation = 0
                     }
-                    OperationCard("转字幕", Icons.Default.Movie, MaterialTheme.colorScheme.secondary, selectedOperation == 1) {
+                    OperationCard("转字幕", Icons.Default.Subtitles, MaterialTheme.colorScheme.secondary, selectedOperation == 1) {
                         selectedOperation = 1
                     }
                     OperationCard("翻译字幕", Icons.Default.Translate, MaterialTheme.colorScheme.tertiary, selectedOperation == 2) {
@@ -230,6 +236,11 @@ fun StudioScreen(navController: NavController? = null) {
                             ),
                         contentAlignment = Alignment.Center
                     ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.1f))
+                        )
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Box(
                                 modifier = Modifier
@@ -259,7 +270,9 @@ fun StudioScreen(navController: NavController? = null) {
                             )
                             Spacer(Modifier.height(12.dp))
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                listOf("mp4", "mkv", "mov", "mp3", "wav", "srt", "vtt").forEach { ext ->
+                                val allExts = listOf("mp4", "mkv", "wav", "srt")
+                                val extraCount = 5
+                                allExts.forEach { ext ->
                                     Text(
                                         ext.uppercase(),
                                         modifier = Modifier
@@ -270,6 +283,15 @@ fun StudioScreen(navController: NavController? = null) {
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
+                                Text(
+                                    "+$extraCount more",
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(4.dp))
+                                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
                             }
                         }
                     }
@@ -397,15 +419,52 @@ fun StudioScreen(navController: NavController? = null) {
         ModalBottomSheet(
             onDismissRequest = { showConfigSheet = false },
             sheetState = configSheetState,
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(24.dp)
             ) {
-                Text("全局配置", style = MaterialTheme.typography.titleLarge)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("全局配置", style = MaterialTheme.typography.titleLarge)
+                    Icon(Icons.Default.Settings, null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
                 Spacer(Modifier.height(20.dp))
+
+                Text("目标语言", style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Spacer(Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .clickable { }
+                        .padding(12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.Language, null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(20.dp))
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            listOf("中文 (简体)", "English", "日本語", "한국어").getOrElse(selectedLanguage) { "中文 (简体)" },
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                    Icon(Icons.Default.MoreVert, null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+
+                Spacer(Modifier.height(16.dp))
 
                 Text("识别模式", style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -423,6 +482,40 @@ fun StudioScreen(navController: NavController? = null) {
                             Text(label)
                         }
                     }
+                }
+
+                Spacer(Modifier.height(16.dp))
+
+                Text("保存目录", style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Spacer(Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .clickable { }
+                        .padding(12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Icon(Icons.Default.FolderOpen, null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(20.dp))
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            outputDir,
+                            style = MaterialTheme.typography.bodyMedium,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                    Icon(Icons.Default.MoreVert, null,
+                        tint = MaterialTheme.colorScheme.primary)
                 }
 
                 Spacer(Modifier.height(24.dp))
@@ -480,6 +573,7 @@ private fun OperationCard(
     Card(
         modifier = Modifier
             .width(112.dp)
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f), RoundedCornerShape(12.dp))
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(

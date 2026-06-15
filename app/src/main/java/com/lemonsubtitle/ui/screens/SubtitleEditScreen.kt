@@ -27,6 +27,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ClosedCaption
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Download
@@ -60,6 +61,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
@@ -124,7 +127,7 @@ fun SubtitleEditScreen(fileUri: String = "", onBack: () -> Unit = {}) {
             TopAppBar(
                 title = {
                     Text(
-                        if (fileUri.isEmpty()) "字幕编辑" else Uri.parse(fileUri).lastPathSegment ?: "字幕编辑",
+                        "柠檬字幕工作室",
                         style = MaterialTheme.typography.titleMedium
                     )
                 },
@@ -155,20 +158,29 @@ fun SubtitleEditScreen(fileUri: String = "", onBack: () -> Unit = {}) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        "双语预览",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Switch(
-                        checked = showBilingualPreview,
-                        onCheckedChange = { showBilingualPreview = it },
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = MaterialTheme.colorScheme.primary,
-                            checkedTrackColor = MaterialTheme.colorScheme.primaryContainer
+                    Column {
+                        Text(
+                            "PREVIEW MODE",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                    )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                "双语预览",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Switch(
+                                checked = showBilingualPreview,
+                                onCheckedChange = { showBilingualPreview = it },
+                                colors = SwitchDefaults.colors(
+                                    checkedThumbColor = MaterialTheme.colorScheme.primary,
+                                    checkedTrackColor = MaterialTheme.colorScheme.primaryContainer
+                                )
+                            )
+                        }
+                    }
                 }
                 FilledTonalButton(
                     onClick = { showExportDialog = true },
@@ -211,7 +223,11 @@ fun SubtitleEditScreen(fileUri: String = "", onBack: () -> Unit = {}) {
                         modifier = Modifier
                             .align(Alignment.BottomCenter)
                             .fillMaxWidth()
-                            .background(Color.Black.copy(alpha = 0.6f))
+                            .background(
+                                Brush.verticalGradient(
+                                    colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.8f))
+                                )
+                            )
                             .padding(16.dp)
                     ) {
                         Box(
@@ -228,6 +244,21 @@ fun SubtitleEditScreen(fileUri: String = "", onBack: () -> Unit = {}) {
                                     .clip(RoundedCornerShape(2.dp))
                                     .background(MaterialTheme.colorScheme.primaryContainer)
                             )
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.CenterStart)
+                                    .fillMaxWidth(0.33f)
+                                    .height(4.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .align(Alignment.CenterEnd)
+                                        .size(12.dp)
+                                        .clip(CircleShape)
+                                        .background(MaterialTheme.colorScheme.primary)
+                                        .shadow(4.dp, CircleShape)
+                                )
+                            }
                         }
                         Spacer(Modifier.height(8.dp))
                         Row(
@@ -376,7 +407,7 @@ fun SubtitleEditScreen(fileUri: String = "", onBack: () -> Unit = {}) {
             },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    listOf("SRT (标准格式)", "VTT (Web格式)", "ASS (高级字幕)").forEachIndexed { i, label ->
+                    listOf("SRT (标准格式)", "VTT (Web格式)", "ASS (特效字幕)").forEachIndexed { i, label ->
                         Button(
                             onClick = { selectedFormat = i },
                             modifier = Modifier.fillMaxWidth(),
@@ -388,7 +419,7 @@ fun SubtitleEditScreen(fileUri: String = "", onBack: () -> Unit = {}) {
                         ) {
                             Text(label, modifier = Modifier.weight(1f))
                             if (selectedFormat == i) {
-                                Icon(Icons.Default.Download, null,
+                                Icon(Icons.Default.CheckCircle, null,
                                     tint = MaterialTheme.colorScheme.primary)
                             }
                         }

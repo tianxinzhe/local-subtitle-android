@@ -95,14 +95,7 @@ fun ModelManagerScreen() {
     ) {
         TopAppBar(
             title = {
-                Column {
-                    Text("模型管理", style = MaterialTheme.typography.headlineLarge)
-                    Text(
-                        "管理已导入的语音识别模型",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+                Text("柠檬字幕工作室", style = MaterialTheme.typography.headlineLarge)
             },
             navigationIcon = {
                 IconButton(onClick = { }) {
@@ -119,6 +112,17 @@ fun ModelManagerScreen() {
         )
 
         Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+            Text(
+                "模型管理",
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                "管理并下载 Whisper 语音识别模型，以优化您的本地字幕处理速度。",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -261,7 +265,7 @@ fun ModelManagerScreen() {
                     modifier = Modifier.size(40.dp))
                 Spacer(Modifier.height(8.dp))
                 Text("手动导入模型", style = MaterialTheme.typography.titleLarge)
-                Text("支持 .gguf 格式的 Whisper 模型文件",
+                Text("支持 .bin 或 .gguf 格式的 Whisper 模型文件",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center)
